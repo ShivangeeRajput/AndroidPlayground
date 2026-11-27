@@ -11,15 +11,16 @@
 - Out of order events, thread safety, persistence chahiye?
 - eventId globally unique hai ya per payment?
 
-## Yaad rakhne wali 3 cheezein
-1. Transition rules ek jagah: `PaymentStatus.canMoveTo` (when)
-2. Duplicate event: `Set<eventId>` (idempotency)
-3. Thread safety: `@Synchronized`, kyunki check + update atomic hona chahiye
-
 ## Likhne ka order
-enum -> processor -> tests -> ViewModel -> Screen
+1. PaymentProcessor.kt (enum + rules)
+2. Test
+3. ViewModel + Screen, AppModule, MainActivity
+
+## Yaad rakho
+- Rules `canMoveTo` mein
+- Duplicate eventId: Set
+- @Synchronized: check + update ek saath
 
 ## Follow ups
-- Persist: Room table (payment + processed_events) ek transaction mein
-- Zyada throughput: per paymentId lock (global eventId set ko thread safe rakhna padega)
-- Out of order events: buffer karke baad mein apply
+- Persist: Room, status + eventId ek transaction mein
+- Result enum return karo taaki pata chale kyun ignore hua
