@@ -1,7 +1,7 @@
 # Machine coding starter (non-functional shell)
 
-Included: Compose + Material3, Navigation, Retrofit + Gson + logging, DataStore, Koin (DI),
-UiState, safeCall, Loading/Error/Empty views, test dependencies, MainDispatcherRule.
+Included: Compose + Material3, Navigation, Retrofit + Gson, Koin (DI),
+safeCall, Loading/Error/Empty views, test dependencies, MainDispatcherRule.
 
 ## 90 minute plan
 - 0-15 min: ask questions, write requirements + approach as comments
@@ -14,9 +14,22 @@ UiState, safeCall, Loading/Error/Empty views, test dependencies, MainDispatcherR
 - Should data survive app restart? Offline support?
 - What should happen on error / empty result?
 
-## Write order (always the same)
-1. `data/`  model, API interface, repository interface + impl
-2. `ui/`    UiState, ViewModel (StateFlow), Screen (stateless composables)
-3. `di/`    register in AppModule
-4. NavHost route in MainActivity
-5. Unit test the ViewModel or logic with a fake repository
+## Write order (hamesha yahi)
+1. ApiService.kt (data class + interface)
+2. RetrofitClient.kt
+3. Repository
+4. ViewModel + State
+5. Screen
+6. di/AppModule + MainActivity -> RUN
+7. Test (fake API)
+
+## RetrofitClient (ratt lo)
+```kotlin
+object RetrofitClient {
+    val api: ApiService = Retrofit.Builder()
+        .baseUrl("https://example.com/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(ApiService::class.java)
+}
+```
