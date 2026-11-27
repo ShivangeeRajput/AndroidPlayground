@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.androidplayground.screen.HomeScreen
 import com.example.androidplayground.ui.theme.AndroidPlaygroundTheme
 
@@ -18,8 +20,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AndroidPlaygroundTheme {
+                val navController = rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen(modifier = Modifier.padding(innerPadding))
+                    NavHost(
+                        navController = navController,
+                        startDestination = "home",
+                        modifier = Modifier.padding(innerPadding),
+                    ) {
+                        composable("home") { HomeScreen() }
+                        // composable("detail/{id}") { ... navController.navigate("detail/$id") }
+                    }
                 }
             }
         }
