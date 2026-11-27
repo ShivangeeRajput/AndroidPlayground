@@ -11,7 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.androidplayground.screen.HomeScreen
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.example.androidplayground.products.ui.ProductDetailScreen
+import com.example.androidplayground.products.ui.ProductListScreen
 import com.example.androidplayground.ui.theme.AndroidPlaygroundTheme
 
 class MainActivity : ComponentActivity() {
@@ -24,11 +27,16 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
                         navController = navController,
-                        startDestination = "home",
+                        startDestination = "list",
                         modifier = Modifier.padding(innerPadding),
                     ) {
-                        composable("home") { HomeScreen() }
-                        // composable("detail/{id}") { ... navController.navigate("detail/$id") }
+                        composable("list") {
+                            ProductListScreen(onClick = { id -> navController.navigate("detail/$id") })
+                        }
+                        composable(
+                            route = "detail/{id}",
+                            arguments = listOf(navArgument("id") { type = NavType.IntType }),
+                        ) { ProductDetailScreen() }
                     }
                 }
             }
