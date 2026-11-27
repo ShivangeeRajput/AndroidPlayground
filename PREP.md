@@ -1,20 +1,19 @@
-# Image loading (bina Coil/Glide ke)
-
-## Pehle poochna
-- Library allowed hai? Agar haan to Coil `AsyncImage` 2 line hai. Zyaadatar "khud banao" bolte hain.
-- Disk cache chahiye? Cache size limit?
-
-## Yaad rakhne wali 4 cheezein
-1. memory -> disk -> network
-2. `inFlight` map of Deferred + Mutex: ek URL ek hi download
-3. `inSampleSize` se downsample (OOM se bachav)
-4. URL change / scroll pe purani coroutine cancel (produceState + key)
+# Image loading (simple version)
 
 ## Likhne ka order
-download + decode + NetworkImage (chala ke dikhao) -> memory cache -> dedupe -> disk cache -> test
+1. ImageLoader.load: sirf download + decode
+2. NetworkImage + grid -> RUN
+3. Memory cache (LruCache)
+4. Disk cache (getBytes), phir test
 
-## Follow ups
-- Disk cache eviction (LRU by lastModified, size limit)
-- View size ke hisaab se maxSize (abhi 512 fixed)
-- Download ko cancel karna jab koi bhi wait nahi kar raha (reference counting)
-- placeholder, crossfade
+## Yaad rakho
+- memory -> disk -> internet
+- Network aur decode Dispatchers.IO pe
+- LaunchedEffect(url): purani request cancel
+
+## Follow ups (yahan nahi likha, bolna aana chahiye)
+- Same url ek saath do baar download ho sakta hai: Map<url, Deferred> + Mutex
+- LruCache count se nahi, size se: override sizeOf
+- inSampleSize view size ke hisaab se
+- Disk cache ka size limit; hashCode ki jagah SHA-256
+- Retry button; production mein Coil

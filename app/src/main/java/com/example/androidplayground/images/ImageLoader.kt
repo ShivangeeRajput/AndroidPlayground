@@ -1,60 +1,42 @@
 package com.example.androidplayground.images
 
-import com.example.androidplayground.core.safeCall
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.LruCache
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.net.URL
 
-interface MemoryCache<T> {
-    fun get(key: String): T?
-    fun put(key: String, value: T)
-}
-
-interface DiskCache {
-    fun get(key: String): ByteArray?
-    fun put(key: String, bytes: ByteArray)
-}
-
-/**
- * memory -> disk -> network. Generic over the image type so it is testable without Bitmap.
- */
-class ImageLoader<T : Any>(
-    private val memory: MemoryCache<T>,
-    private val disk: DiskCache,
-    private val download: suspend (url: String) -> ByteArray,
-    private val decode: (ByteArray) -> T?,
-    dispatcher: CoroutineDispatcher,
+// Order: memory -> disk -> internet
+class ImageLoader(
+    private val folder: File,
+    private val download: (String) -> ByteArray = { URL(it).readBytes() },
 ) {
-    // Own scope: one caller scrolling away must not cancel a download others are waiting for.
-    private val scope = CoroutineScope(SupervisorJob() + dispatcher)
-    private val mutex = Mutex()
-    private val inFlight = mutableMapOf<String, Deferred<Result<T>>>()
+    // Memory cache: last 50 images. lazy isliye ki unit test mein LruCache nahi hota
+    private val memory by lazy { LruCache<String, Bitmap>(50) }
 
-    suspend fun load(url: String): Result<T> {
-        memory.get(url)?.let { return Result.success(it) }
+    suspend fun load(url: String): Bitmap? {
+        memory.get(url)?.let { return it }
 
-        val request = mutex.withLock {
-            inFlight.getOrPut(url) {
-                scope.async {
-                    val result = safeCall { fetch(url) }
-                    mutex.withLock { inFlight.remove(url) }
-                    result
-                }
-            }
+        return withContext(Dispatchers.IO) {
+            val bytes = getBytes(url)
+            val options = BitmapFactory.Options().apply { inSampleSize = 2 } // aadha size, kam memory
+            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, options)
+                ?.also { memory.put(url, it) }
         }
-        return request.await()
     }
 
-    private suspend fun fetch(url: String): T {
-        val cached = disk.get(url)
-        val bytes = cached ?: download(url)
-        val image = checkNotNull(decode(bytes)) { "Could not decode $url" }
-        if (cached == null) disk.put(url, bytes) // only save bytes that decoded fine
-        memory.put(url, image)
-        return image
+    // Disk cache: file mein hai to wahi, warna download karke save
+    fun getBytes(url: String): ByteArray {
+        val file = File(folder, url.hashCode().toString())
+        if (file.exists()) return file.readBytes()
+
+        val bytes = download(url)
+        folder.mkdirs()
+        val temp = File.createTempFile("img", null, folder) // adhi likhi file kabhi na padhi jaye
+        temp.writeBytes(bytes)
+        temp.renameTo(file)
+        return bytes
     }
 }
