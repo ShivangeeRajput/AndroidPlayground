@@ -1,18 +1,26 @@
-# Paginated API + search + list/detail  (API: dummyjson.com/products)
+# Paginated search + list + detail (simple version)
 
-## Pehle poochna
-- Pagination kaisi hai: skip/limit, page number, ya cursor?
-- Search server side hai? Detail ke liye alag API?
+## Kaunsi file kya karti hai (isi order mein likho)
+1. ApiService.kt        data class + API ke URL
+2. RetrofitClient.kt    Retrofit object (HTTP + JSON)
+3. ProductRepository.kt API call + error pakadna
+4. ProductViewModel.kt  state, pagination, search
+5. ProductListScreen.kt UI
+6. di/AppModule.kt + MainActivity -> RUN
+7. DetailViewModel + DetailScreen + navigation
+8. SearchStore.kt (storage), phir test
 
-## Yaad rakhne wali 4 cheezein
-1. Ek hi `job`: query badle to cancel (purana result naye ko overwrite nahi karega)
-2. Debounce = request se pehle `delay(400)` usi job ke andar
-3. Guard: `if (isLoading || endReached || error != null) return`
-4. `skip = items.size`: page counter alag se rakhne ki zaroorat nahi
+## Doc ki capabilities kahan cover hui
+- Basic UI: ProductListScreen, DetailScreen
+- HTTP client: RetrofitClient
+- JSON: GsonConverterFactory
+- State management: ViewModel + StateFlow
+- Navigation: NavHost in MainActivity
+- Storage: SearchStore (SharedPreferences)
+- DI: AppModule (Koin)
+- Testing: ProductViewModelTest
 
-## Likhne ka order
-model + API -> Repository -> ListViewModel -> ListScreen -> detail -> NavHost -> test
-
-## Follow ups
-- Paging 3 library, Room cache for offline, pull to refresh
-- Flow version: queryFlow.debounce(400).distinctUntilChanged().flatMapLatest
+## 3 baatein yaad rakho
+- Pagination: skip = products.size
+- Search: job.cancel() + delay(400)
+- loadMore guard: loading / error / sab aa gaya
