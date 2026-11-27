@@ -19,7 +19,7 @@ data class ProductState(
 )
 
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
-    private val _state = MutableStateFlow(ProductState(query = repository.lastQuery))
+    private val _state = MutableStateFlow(ProductState())
     val state = _state.asStateFlow()
 
     private var job: Job? = null
@@ -54,7 +54,6 @@ class ProductViewModel(private val repository: ProductRepository) : ViewModel() 
 
     fun search(query: String) {
         job?.cancel() // purani request band
-        repository.lastQuery = query
         _state.value = ProductState(query = query) // list reset
         load(waitMillis = 400) // debounce: typing rukne ka wait
     }

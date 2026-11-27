@@ -21,20 +21,15 @@ private class FakeApi : ApiService {
     override suspend fun getProduct(id: Int) = all[id]
 }
 
-private class FakeStore : SearchStore {
-    override var lastQuery = ""
-}
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProductViewModelTest {
     @get:Rule val mainRule = MainDispatcherRule()
 
     private val api = FakeApi()
-    private val store = FakeStore()
 
     @Test
     fun `loadMore adds the next page`() = runTest(mainRule.dispatcher) {
-        val viewModel = ProductViewModel(ProductRepository(api, store))
+        val viewModel = ProductViewModel(ProductRepository(api))
         advanceUntilIdle()
         assertEquals(20, viewModel.state.value.products.size)
 
@@ -44,8 +39,8 @@ class ProductViewModelTest {
     }
 
     @Test
-    fun `fast typing calls the api only for the last text and saves it`() = runTest(mainRule.dispatcher) {
-        val viewModel = ProductViewModel(ProductRepository(api, store))
+    fun `fast typing calls the api only for the last text`() = runTest(mainRule.dispatcher) {
+        val viewModel = ProductViewModel(ProductRepository(api))
         advanceUntilIdle()
 
         viewModel.search("p")
@@ -53,6 +48,5 @@ class ProductViewModelTest {
         advanceUntilIdle()
 
         assertEquals(listOf("", "ph"), api.queries)
-        assertEquals("ph", store.lastQuery)
     }
 }

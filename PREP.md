@@ -8,7 +8,7 @@
 5. ProductListScreen.kt UI
 6. di/AppModule.kt + MainActivity -> RUN
 7. DetailViewModel + DetailScreen + navigation
-8. SearchStore.kt (storage), phir test
+8. Test
 
 ## Doc ki capabilities kahan cover hui
 - Basic UI: ProductListScreen, DetailScreen
@@ -16,7 +16,7 @@
 - JSON: GsonConverterFactory
 - State management: ViewModel + StateFlow
 - Navigation: NavHost in MainActivity
-- Storage: SearchStore (SharedPreferences)
+- Storage: abhi nahi hai. Maange to SharedPreferences se last search save karo
 - DI: AppModule (Koin)
 - Testing: ProductViewModelTest
 
