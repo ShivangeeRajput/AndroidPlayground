@@ -1,18 +1,13 @@
 package com.example.androidplayground.di
 
-import com.example.androidplayground.core.createOkHttpClient
-import com.example.androidplayground.todo.data.DataStoreTodoRepository
-import com.example.androidplayground.todo.data.TodoRepository
-import com.example.androidplayground.todo.ui.TodoViewModel
+import com.example.androidplayground.todo.PrefsTodoStore
+import com.example.androidplayground.todo.TodoStore
+import com.example.androidplayground.todo.TodoViewModel
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-// Register your dependencies here, e.g.
-//   single { createRetrofit("https://dummyjson.com/", get()).create(MyApi::class.java) }
-//   singleOf(::MyRepositoryImpl) { bind<MyRepository>() }
-//   viewModelOf(::MyViewModel)
 val appModule = module {
-    single { createOkHttpClient() }
-    single<TodoRepository> { DataStoreTodoRepository(get()) }
+    single<TodoStore> { PrefsTodoStore(androidContext()) }
     viewModelOf(::TodoViewModel)
 }

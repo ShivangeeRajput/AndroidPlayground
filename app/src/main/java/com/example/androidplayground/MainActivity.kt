@@ -4,15 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.androidplayground.todo.ui.TodoScreen
 import com.example.androidplayground.ui.theme.AndroidPlaygroundTheme
+import com.example.androidplayground.todo.TodoScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,16 +18,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AndroidPlaygroundTheme {
-                val navController = rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavHost(
-                        navController = navController,
-                        startDestination = "home",
-                        modifier = Modifier.padding(innerPadding),
-                    ) {
-                        composable("home") { TodoScreen() }
-                        // composable("detail/{id}") { ... navController.navigate("detail/$id") }
-                    }
+                    Box(Modifier.padding(innerPadding)) { TodoScreen() }
                 }
             }
         }
