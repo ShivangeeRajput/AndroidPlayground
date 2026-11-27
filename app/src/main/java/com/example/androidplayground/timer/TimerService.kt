@@ -14,6 +14,7 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -30,6 +31,8 @@ class TimerService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val notifications by lazy { getSystemService(NotificationManager::class.java) }
 
+    private var observer: Job? = null
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
@@ -38,13 +41,6 @@ class TimerService : Service() {
             notifications.createNotificationChannel(
                 NotificationChannel(CHANNEL_ID, "Timer", NotificationManager.IMPORTANCE_LOW),
             )
-        }
-        scope.launch {
-            // Update the notification only when the visible text changes.
-            engine.state.map { it.text to it.isFinished }.distinctUntilChanged().collect { (text, finished) ->
-                notifications.notify(NOTIFICATION_ID, notification(if (finished) "Time's up!" else text))
-                if (finished) stop(removeNotification = false)
-            }
         }
     }
 
@@ -57,13 +53,21 @@ class TimerService : Service() {
         }
         engine.start()
         ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(engine.state.value.text), type)
+        // Observe only after start(): an old "finished" state must not stop the new service.
+        if (observer == null) observer = observeTimer()
         return START_NOT_STICKY
     }
 
-    private fun stop(removeNotification: Boolean) {
-        val mode = if (removeNotification) ServiceCompat.STOP_FOREGROUND_REMOVE else ServiceCompat.STOP_FOREGROUND_DETACH
-        ServiceCompat.stopForeground(this, mode)
-        stopSelf()
+    /** Update the notification only when the visible text changes. */
+    private fun observeTimer(): Job = scope.launch {
+        engine.state.map { it.text to it.isFinished }.distinctUntilChanged().collect { (text, finished) ->
+            notifications.notify(NOTIFICATION_ID, notification(if (finished) "Time's up!" else text))
+            if (finished) {
+                // DETACH keeps the "Time's up!" notification visible after the service stops.
+                ServiceCompat.stopForeground(this@TimerService, ServiceCompat.STOP_FOREGROUND_DETACH)
+                stopSelf()
+            }
+        }
     }
 
     private fun notification(text: String): Notification =
