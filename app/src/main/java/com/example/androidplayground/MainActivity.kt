@@ -12,6 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.androidplayground.screen.HomeScreen
+import com.example.androidplayground.timer.ui.ServiceTimerScreen
+import com.example.androidplayground.timer.ui.SimpleTimerScreen
 import com.example.androidplayground.ui.theme.AndroidPlaygroundTheme
 
 class MainActivity : ComponentActivity() {
@@ -27,8 +29,9 @@ class MainActivity : ComponentActivity() {
                         startDestination = "home",
                         modifier = Modifier.padding(innerPadding),
                     ) {
-                        composable("home") { HomeScreen() }
-                        // composable("detail/{id}") { ... navController.navigate("detail/$id") }
+                        composable("home") { HomeScreen(onOpen = navController::navigate) }
+                        composable("simple") { SimpleTimerScreen() }
+                        composable("service") { ServiceTimerScreen() }
                     }
                 }
             }
