@@ -1,19 +1,21 @@
-# Timer: with and without foreground service
-
-## Pehle poochna
-- Countdown ya stopwatch? Background / app close hone pe chalna chahiye?
-
-## Yaad rakhne wali 4 cheezein
-1. `endTime - now()` use karo, `time--` nahi (drift). Clock: `SystemClock.elapsedRealtime`
-2. Start pe guard: `if (job?.isActive == true) return`
-3. Engine pure Kotlin -> same code ViewModel, Service aur test mein
-4. Service: permission (FOREGROUND_SERVICE + type), manifest entry, `startForeground` turant, scope cancel in onDestroy
+# Timer (simple version)
 
 ## Likhne ka order
-Engine -> test -> ViewModel + Screen (yahi pehle chala ke dikhao) -> Service + manifest
+1. Timer.kt           countdown logic
+2. TimerViewModel.kt + TimerScreen.kt -> RUN (bina service wala ho gaya)
+3. TimerService.kt + AndroidManifest (permission + service)
+4. Test
+
+## Yaad rakho
+- job?.isActive guard, warna do timer chalenge
+- Service: startForeground turant, scope.cancel() onDestroy mein
+
+## Zaroor bolna (limitation)
+`delay(1000); seconds--` thoda drift karta hai aur pause pe adha second kho jaata hai.
+Fix: end time save karo
+    val endTime = SystemClock.elapsedRealtime() + remainingMillis
+    remainingMillis = endTime - SystemClock.elapsedRealtime()
 
 ## Follow ups
-- ViewModel timer rotation pe bachta hai, process death pe nahi (endTime save karo)
-- Exact alarm chahiye to AlarmManager. WorkManager exact timer ke liye nahi hai
-- START_STICKY vs START_NOT_STICKY
-- Abhi notification mein Pause button nahi hai: PendingIntent + action se add hota hai
+- Notification mein Pause button: PendingIntent
+- Exact alarm: AlarmManager

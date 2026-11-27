@@ -1,4 +1,4 @@
-package com.example.androidplayground.timer.ui
+package com.example.androidplayground.timer
 
 import android.Manifest
 import android.os.Build
@@ -19,22 +19,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.androidplayground.timer.TimerEngine
-import com.example.androidplayground.timer.TimerService
-import com.example.androidplayground.timer.TimerState
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 
 @Composable
 fun SimpleTimerScreen(viewModel: TimerViewModel = koinViewModel()) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    TimerContent("Without service", state, viewModel::start, viewModel::pause, viewModel::reset)
+    val state by viewModel.timer.state.collectAsStateWithLifecycle()
+    TimerContent("Without service", state, viewModel.timer::start, viewModel.timer::pause, viewModel.timer::reset)
 }
 
 @Composable
-fun ServiceTimerScreen(engine: TimerEngine = koinInject()) {
+fun ServiceTimerScreen(timer: Timer = koinInject()) {
     val context = LocalContext.current
-    val state by engine.state.collectAsStateWithLifecycle()
+    val state by timer.state.collectAsStateWithLifecycle()
     // The timer works even if permission is denied; only the notification is hidden.
     val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         TimerService.start(context)
@@ -50,8 +47,8 @@ fun ServiceTimerScreen(engine: TimerEngine = koinInject()) {
                 TimerService.start(context)
             }
         },
-        onPause = { engine.pause(); TimerService.stop(context) },
-        onReset = { engine.reset(); TimerService.stop(context) },
+        onPause = { timer.pause(); TimerService.stop(context) },
+        onReset = { timer.reset(); TimerService.stop(context) },
     )
 }
 

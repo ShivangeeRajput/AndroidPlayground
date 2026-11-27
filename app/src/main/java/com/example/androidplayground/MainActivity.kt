@@ -8,13 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import com.example.androidplayground.ui.theme.AndroidPlaygroundTheme
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.androidplayground.screen.HomeScreen
-import com.example.androidplayground.timer.ui.ServiceTimerScreen
-import com.example.androidplayground.timer.ui.SimpleTimerScreen
-import com.example.androidplayground.ui.theme.AndroidPlaygroundTheme
+import com.example.androidplayground.timer.HomeScreen
+import com.example.androidplayground.timer.ServiceTimerScreen
+import com.example.androidplayground.timer.SimpleTimerScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,14 +22,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AndroidPlaygroundTheme {
-                val navController = rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavHost(
-                        navController = navController,
-                        startDestination = "home",
-                        modifier = Modifier.padding(innerPadding),
-                    ) {
-                        composable("home") { HomeScreen(onOpen = navController::navigate) }
+                    val navController = rememberNavController()
+                    NavHost(navController, startDestination = "home", modifier = Modifier.padding(innerPadding)) {
+                        composable("home") { HomeScreen(onOpen = { navController.navigate(it) }) }
                         composable("simple") { SimpleTimerScreen() }
                         composable("service") { ServiceTimerScreen() }
                     }

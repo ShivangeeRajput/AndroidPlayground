@@ -24,10 +24,10 @@ import org.koin.android.ext.android.inject
 
 /**
  * Keeps the process alive and shows a notification. The countdown itself is in a
- * singleton TimerEngine, which the screen observes directly.
+ * singleton Timer, which the screen observes directly.
  */
 class TimerService : Service() {
-    private val engine: TimerEngine by inject()
+    private val timer: Timer by inject()
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private val notifications by lazy { getSystemService(NotificationManager::class.java) }
 
@@ -51,8 +51,8 @@ class TimerService : Service() {
         } else {
             0
         }
-        engine.start()
-        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(engine.state.value.text), type)
+        timer.start()
+        ServiceCompat.startForeground(this, NOTIFICATION_ID, notification(timer.state.value.text), type)
         // Observe only after start(): an old "finished" state must not stop the new service.
         if (observer == null) observer = observeTimer()
         return START_NOT_STICKY
@@ -60,7 +60,7 @@ class TimerService : Service() {
 
     /** Update the notification only when the visible text changes. */
     private fun observeTimer(): Job = scope.launch {
-        engine.state.map { it.text to it.isFinished }.distinctUntilChanged().collect { (text, finished) ->
+        timer.state.map { it.text to (it.seconds == 0) }.distinctUntilChanged().collect { (text, finished) ->
             notifications.notify(NOTIFICATION_ID, notification(if (finished) "Time's up!" else text))
             if (finished) {
                 // DETACH keeps the "Time's up!" notification visible after the service stops.
