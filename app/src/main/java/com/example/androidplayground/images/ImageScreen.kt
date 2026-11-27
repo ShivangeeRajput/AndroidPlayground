@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -45,7 +46,12 @@ fun NetworkImage(url: String, modifier: Modifier = Modifier, loader: ImageLoader
     Box(modifier, contentAlignment = Alignment.Center) {
         val image = bitmap
         when {
-            image != null -> Image(image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop)
+            image != null -> Image(
+                image.asImageBitmap(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
             failed -> Text("Failed")
             else -> CircularProgressIndicator()
         }
