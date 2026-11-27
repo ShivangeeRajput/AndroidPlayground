@@ -1,7 +1,14 @@
 # Payment state machine
 
+## Question
+- processEvent(paymentId, eventId, newStatus), har payment ka current status maintain karo
+- Naya payment INITIATED
+- Allowed: INITIATED->PENDING, INITIATED->FAILED, PENDING->SUCCESS, PENDING->FAILED
+- SUCCESS aur FAILED terminal. Invalid transition se status nahi badalta
+
 ## Pehle poochna
-- Problem ke baaki rules? (duplicate event, out of order event, thread safety, persistence)
+- eventId ka kya karna hai? Question mein rule nahi hai. Duplicate ignore karna humara assumption hai
+- Out of order events, thread safety, persistence chahiye?
 - eventId globally unique hai ya per payment?
 
 ## Yaad rakhne wali 3 cheezein

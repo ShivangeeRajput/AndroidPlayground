@@ -4,6 +4,7 @@ import com.example.androidplayground.payment.data.EventResult.APPLIED
 import com.example.androidplayground.payment.data.EventResult.DUPLICATE_EVENT
 import com.example.androidplayground.payment.data.EventResult.INVALID_TRANSITION
 import com.example.androidplayground.payment.data.PaymentProcessor
+import com.example.androidplayground.payment.data.PaymentStatus
 import com.example.androidplayground.payment.data.PaymentStatus.FAILED
 import com.example.androidplayground.payment.data.PaymentStatus.INITIATED
 import com.example.androidplayground.payment.data.PaymentStatus.PENDING
@@ -45,5 +46,15 @@ class PaymentProcessorTest {
         assertEquals(INVALID_TRANSITION, processor.processEvent("p1", "e2", SUCCESS))
         processor.processEvent("p1", "e1", PENDING)
         assertEquals(APPLIED, processor.processEvent("p1", "e2", SUCCESS))
+    }
+
+    @Test
+    fun `only the four listed transitions are allowed`() {
+        val allowed = setOf(INITIATED to PENDING, INITIATED to FAILED, PENDING to SUCCESS, PENDING to FAILED)
+        for (from in PaymentStatus.entries) {
+            for (to in PaymentStatus.entries) {
+                assertEquals("$from -> $to", (from to to) in allowed, from.canMoveTo(to))
+            }
+        }
     }
 }
