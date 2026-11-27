@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.example.androidplayground.screen.TimerScreen
+import com.example.androidplayground.screen.UserScreen
 import com.example.androidplayground.ui.theme.AndroidPlaygroundTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +24,16 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     TimerScreen(modifier = Modifier.padding(innerPadding))
                 }
+
+                // for users screen only
+                Scaffold(modifier = Modifier.fillMaxSize()) {innerrPadding ->
+                    UserScreen(
+                        modifier = Modifier.padding(innerrPadding)
+                    )
+                }
             }
         }
     }
+
+
 }

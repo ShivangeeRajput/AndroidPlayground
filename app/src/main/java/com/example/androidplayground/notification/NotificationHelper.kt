@@ -95,8 +95,8 @@ object NotificationHelper {
 
         val notification = NotificationCompat.Builder(context, FINISHED_CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("Time's up!")
-            .setContentText("Your timer has finished.")
+            .setContentTitle("Time's up")
+            .setContentText("Your timer has finished")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(openAppIntent(context))
             .setAutoCancel(true)
