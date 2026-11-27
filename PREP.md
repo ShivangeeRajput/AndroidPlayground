@@ -1,18 +1,17 @@
-# Custom LiveData
-
-## Pehle poochna
-- Lifecycle aware chahiye? Sticky behaviour? postValue? map/switchMap?
-
-## Yaad rakhne wali 4 cheezein
-1. `version` (data) vs `seenVersion` (observer) -> duplicate delivery nahi
-2. Active = at least STARTED
-3. ON_DESTROY pe remove (memory leak nahi)
-4. postValue = main thread executor pe setValue
+# Custom LiveData (simple version)
 
 ## Likhne ka order
-observeForever + setValue (5 min mein working) -> version -> lifecycle -> postValue -> test
+1. value + setValue + observer list
+2. version / lastVersion
+3. Lifecycle check (STARTED, DESTROYED)
+4. postValue, screen, test
+
+## Yaad rakho
+- Sirf STARTED owner ko bhejo
+- DESTROYED pe hatao (leak nahi)
+- version se same value dobara nahi
 
 ## Follow ups
-- Real LiveData postValue jaldi jaldi call ho to sirf last value deta hai; yahan har value post hoti hai
-- Real LiveData observer ke andar setValue (re-entrancy) alag flags se handle karta hai
-- LiveData vs StateFlow: StateFlow ko initial value chahiye, equal values skip karta hai
+- observeForever, map / switchMap (MediatorLiveData)
+- Real LiveData mein MutableLiveData alag hota hai, taaki UI value set na kar sake
+- LiveData vs StateFlow
