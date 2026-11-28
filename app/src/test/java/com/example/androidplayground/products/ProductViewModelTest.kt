@@ -31,11 +31,11 @@ class ProductViewModelTest {
     fun `loadMore adds the next page`() = runTest(mainRule.dispatcher) {
         val viewModel = ProductViewModel(ProductRepository(api))
         advanceUntilIdle()
-        assertEquals(20, viewModel.state.value.products.size)
+        assertEquals(20, viewModel.products.size)
 
         viewModel.loadMore()
         advanceUntilIdle()
-        assertEquals(30, viewModel.state.value.products.size)
+        assertEquals(30, viewModel.products.size)
     }
 
     @Test

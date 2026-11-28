@@ -11,8 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
 import com.example.androidplayground.products.DetailScreen
 import com.example.androidplayground.products.ProductListScreen
 import com.example.androidplayground.ui.theme.AndroidPlaygroundTheme
@@ -33,10 +31,10 @@ class MainActivity : ComponentActivity() {
                         composable("list") {
                             ProductListScreen(onClick = { id -> navController.navigate("detail/$id") })
                         }
-                        composable(
-                            route = "detail/{id}",
-                            arguments = listOf(navArgument("id") { type = NavType.IntType }),
-                        ) { entry -> DetailScreen(id = entry.arguments?.getInt("id") ?: 0) }
+                        composable("detail/{id}") { entry ->
+                            val id = entry.arguments?.getString("id")!!.toInt()
+                            DetailScreen(id)
+                        }
                     }
                 }
             }

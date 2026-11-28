@@ -1,60 +1,64 @@
 package com.example.androidplayground.products
 
-import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class ProductState(
-    val query: String = "",
-    val products: List<Product> = emptyList(),
-    val total: Int = 0,
-    val isLoading: Boolean = false,
-    val error: String? = null,
-)
-
 class ProductViewModel(private val repository: ProductRepository) : ViewModel() {
-    private val _state = MutableStateFlow(ProductState())
-    val state = _state.asStateFlow()
+    var query by mutableStateOf("")
+        private set
+    var products by mutableStateOf<List<Product>>(emptyList())
+        private set
+    var isLoading by mutableStateOf(false)
+        private set
+    var isError by mutableStateOf(false)
+        private set
 
+    private var total = 0
     private var job: Job? = null
 
     init {
         load()
     }
 
-    // Agla page laata hai. skip = jitne products already hain
-    fun load(waitMillis: Long = 0) {
-        _state.update { it.copy(isLoading = true, error = null) }
-        job = viewModelScope.launch {
-            delay(waitMillis)
-            repository.getProducts(_state.value.query, skip = _state.value.products.size)
-                .onSuccess { response ->
-                    _state.update {
-                        it.copy(products = it.products + response.products, total = response.total, isLoading = false)
-                    }
-                }
-                .onFailure { e ->
-                    Log.e("Products", "load failed", e)
-                    _state.update { it.copy(isLoading = false, error = "Something went wrong") }
-                }
-        }
+    // Agla page (retry bhi yahi hai)
+    fun load() {
+        job = viewModelScope.launch { fetchNextPage() }
     }
 
     fun loadMore() {
-        val s = _state.value
-        if (s.isLoading || s.error != null || s.products.size >= s.total) return
+        if (isLoading || isError || products.size >= total) return
         load()
     }
 
-    fun search(query: String) {
+    fun search(text: String) {
         job?.cancel() // purani request band
-        _state.value = ProductState(query = query) // list reset
-        load(waitMillis = 400) // debounce: typing rukne ka wait
+        query = text
+        products = emptyList() // list reset
+        total = 0
+        isError = false
+        isLoading = true
+        job = viewModelScope.launch {
+            delay(400) // debounce: typing rukne ka wait
+            fetchNextPage()
+        }
+    }
+
+    // skip = jitne products already hain
+    private suspend fun fetchNextPage() {
+        isLoading = true
+        isError = false
+        repository.getProducts(query, skip = products.size)
+            .onSuccess {
+                products = products + it.products
+                total = it.total
+            }
+            .onFailure { isError = true }
+        isLoading = false
     }
 }
