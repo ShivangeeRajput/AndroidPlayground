@@ -17,8 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -58,10 +56,11 @@ class TimerService : Service() {
         return START_NOT_STICKY
     }
 
-    /** Update the notification only when the visible text changes. */
+    /** Har state change par notification update karo. */
     private fun observeTimer(): Job = scope.launch {
-        timer.state.map { it.text to (it.seconds == 0) }.distinctUntilChanged().collect { (text, finished) ->
-            notifications.notify(NOTIFICATION_ID, notification(if (finished) "Time's up!" else text))
+        timer.state.collect { state ->
+            val finished = state.seconds == 0
+            notifications.notify(NOTIFICATION_ID, notification(if (finished) "Time's up!" else state.text))
             if (finished) {
                 // DETACH keeps the "Time's up!" notification visible after the service stops.
                 ServiceCompat.stopForeground(this@TimerService, ServiceCompat.STOP_FOREGROUND_DETACH)
