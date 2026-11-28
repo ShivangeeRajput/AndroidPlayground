@@ -14,13 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun StockListScreen(state: StockState, onClick: (String) -> Unit) {
+fun StockListScreen(stocks: List<Stock>, isError: Boolean, onClick: (String) -> Unit) {
     Column {
-        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (state.stocks.isEmpty()) CircularProgressIndicator()
+        if (isError) Text("Could not refresh", color = MaterialTheme.colorScheme.error)
+        if (stocks.isEmpty()) CircularProgressIndicator()
 
         LazyColumn {
-            items(state.stocks, key = { it.symbol }) { stock ->
+            items(stocks, key = { it.symbol }) { stock ->
                 ListItem(
                     modifier = Modifier.clickable { onClick(stock.symbol) },
                     headlineContent = { Text(stock.symbol) },
