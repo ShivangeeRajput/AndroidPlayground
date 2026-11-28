@@ -1,26 +1,27 @@
 package com.example.androidplayground.todo
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 class TodoViewModel(private val store: TodoStore) : ViewModel() {
-    private val _todos = MutableStateFlow(store.load())
-    val todos = _todos.asStateFlow()
+    var todos by mutableStateOf(store.load())
+        private set
 
     fun add(title: String) {
         if (title.isBlank()) return
-        val id = (_todos.value.maxOfOrNull { it.id } ?: 0) + 1
-        update(_todos.value + Todo(id, title.trim()))
+        val id = (todos.maxOfOrNull { it.id } ?: 0) + 1
+        update(todos + Todo(id, title.trim()))
     }
 
-    fun toggle(id: Long) = update(_todos.value.map { if (it.id == id) it.copy(done = !it.done) else it })
+    fun toggle(id: Long) = update(todos.map { if (it.id == id) it.copy(done = !it.done) else it })
 
-    fun delete(id: Long) = update(_todos.value.filter { it.id != id })
+    fun delete(id: Long) = update(todos.filter { it.id != id })
 
     // Har change: state badlo aur save karo
     private fun update(newList: List<Todo>) {
-        _todos.value = newList
+        todos = newList
         store.save(newList)
     }
 }

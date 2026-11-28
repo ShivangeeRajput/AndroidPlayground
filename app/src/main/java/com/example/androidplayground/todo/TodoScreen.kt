@@ -21,12 +21,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun TodoScreen(viewModel: TodoViewModel = koinViewModel()) {
-    val todos by viewModel.todos.collectAsStateWithLifecycle()
+    val todos = viewModel.todos
     var input by rememberSaveable { mutableStateOf("") }
 
     Column(Modifier.fillMaxSize().padding(16.dp)) {
